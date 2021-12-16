@@ -133,7 +133,7 @@ function Passaro(alturaJogo) {
 
         //define a nova altura baseando se esta em queda ou voando
         //8 e -7 podemos e a velocidade que sobe ou cai
-        const novoY = this.getY() + (voando ? 8 : -7);
+        const novoY = this.getY() + (voando ? 8 : -6);
         //define altura max do jogo subtraindo do tamanho da tela o tamanho do passaro e o tamanho da borda
         const alturaMax = alturaJogo - this.elemento.clientHeight - 10;
 
@@ -168,25 +168,78 @@ function Progresso() {
     this.atualizarPontos(0);
 }
 
+//Funcao que verifica se dois elementos estao se sobrepondo
+function sobreposicao(elementoA, elementoB) {
+
+    //elementos a serem verificados
+    const a = elementoA.getBoundingClientRect();
+    const b = elementoB.getBoundingClientRect();
+
+    //verifica se houve sobreposicao no eixo x
+    const horizontal = ( a.left + a.width >= b.left ) && ( b.left + b.width >= a.left );
+    
+    //verifica se houve sobreposicao no eixo y
+    const vertical = ( a.top + a.height >= b.top ) && ( b.top + b.height >= a.top );
+ 
+    return horizontal && vertical;
+}
+
+//Funcao que verifica se o passaro colidiu com alguma das barreiras do par
+function colidiu(passaro, barreiras) {
+
+    let colidiu = false;
+
+    //verifica para cada par de barreira
+    barreiras.pares.forEach(ParDeBarreiras => {
+
+        //entra apenas se nao houve colisao ainda
+        if(!colidiu) {
+
+            //par de obstaculos
+            const superior = ParDeBarreiras.superior.elemento;
+            const inferior = ParDeBarreiras.inferior.elemento;
+
+            //chama a funcao q verifica se houve a sobreposicao
+            //se houve na superior ou na inferior retorna true
+            colidiu = sobreposicao(passaro.elemento, superior) || sobreposicao(passaro.elemento, inferior)
+        }
+    });
+
+    return colidiu;
+}
+
 function FlappyBird(){
+
     let pontos = 0;
+
+    //define a area do jogo
     const areaJogo = document.querySelector('[wm-flappy]');
     const altura = areaJogo.clientHeight;
     const largura = areaJogo.clientWidth;
 
+    //constroi cada elemento
     const progresso = new Progresso();
     const passaro = new Passaro(altura);
     const obstaculo = new Barreiras(altura, largura, 200, 400, 
         () => progresso.atualizarPontos(++pontos));
-        
+    
+    //coloca cada elemento na tela de jogo
     areaJogo.appendChild(progresso.elemento);
     areaJogo.appendChild(passaro.elemento);
     obstaculo.pares.forEach(par => areaJogo.appendChild(par.elemento));
 
+    //funcao que inicia o jogo
     this.start = () => {
+
         const temporizador = setInterval(() => {
+
             obstaculo.animar();
             passaro.animar();
+
+            //verifica se houve colisao
+            if (colidiu(passaro, obstaculo)) {
+                clearInterval(temporizador);
+            }
         }, 20); 
     }
 
