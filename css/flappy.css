@@ -1,8 +1,10 @@
 
 @font-face {
-    font-family: Pixel;
+    font-family: 'Pixel';
     src: url('../fonts/Pixel.ttf');
+}
 
+@font-face {
     font-family: 'Oswald';
     src: url('../fonts/Oswald-Regular.ttf') format('truetype');
 }
@@ -10,7 +12,7 @@
 * {
     font-family: 'Oswald', sans-serif;
     box-sizing: border-box;
-}
+} 
 
 html {
     height: 100%;
@@ -85,4 +87,5 @@ body {
     right: 10px;
     font-family: Pixel;
     font-size: 70px;
+    z-index: 100;
 }
