@@ -8,7 +8,7 @@ function novoElemento(tagName, className) {
 }
 
 //Funcao para criar um obstaculo, o parametro diz se ela esta em baixo ou em cima da div
-function barreira(reversa = false) {
+function Barreira(reversa = false) {
 
     //cria os elementos para gerar o obstaculo completo
     this.elemento = novoElemento('div', 'barreira');
@@ -25,14 +25,14 @@ function barreira(reversa = false) {
 }
 
 //Funcao que cria o par de obstaculos, um em cima e outro em baixo
-function parDeBarreiras(altura, abertura, x) {
+function ParDeBarreiras(altura, abertura, x) {
 
     //cria a div do par
     this.elemento = novoElemento('div', 'par-de-barreiras');
 
     //cria os dois obstaculos
-    this.superior = new barreira(true);
-    this.inferior = new barreira(false);
+    this.superior = new Barreira(true);
+    this.inferior = new Barreira(false);
 
     //agrupa nessa div tudo sobre os obstaculos
     this.elemento.appendChild(this.superior.elemento);
@@ -62,14 +62,14 @@ function parDeBarreiras(altura, abertura, x) {
 }
 
 //funcao que cria e controla todos os obstaculos
-function barreiras(altura, largura, abertura, espaco, notificarPonto) {
+function Barreiras(altura, largura, abertura, espaco, notificarPonto) {
 
     //gera todos obstaculos
     this.pares = [
-        new parDeBarreiras(altura, abertura, largura),
-        new parDeBarreiras(altura, abertura, largura + espaco),
-        new parDeBarreiras(altura, abertura, largura + espaco * 2),
-        new parDeBarreiras(altura, abertura, largura + espaco * 3)
+        new ParDeBarreiras(altura, abertura, largura),
+        new ParDeBarreiras(altura, abertura, largura + espaco),
+        new ParDeBarreiras(altura, abertura, largura + espaco * 2),
+        new ParDeBarreiras(altura, abertura, largura + espaco * 3)
     ]
 
     //controla a "velocidade" da animacao
@@ -85,7 +85,7 @@ function barreiras(altura, largura, abertura, espaco, notificarPonto) {
             
             //verifica se o obstaculo saiu da tela
             if (par.getX() < -par.getLargura()) {
-                console.log(this.pares.length);
+                
                 //se saiu entao reposiciona ele no final para reaproveitar o obstaculo
                 par.setX(par.getX() + espaco * this.pares.length);
                 //sorteia para mudar a abertura
@@ -110,11 +110,64 @@ function barreiras(altura, largura, abertura, espaco, notificarPonto) {
     }
 }
 
-const b = new barreiras(700, 1100, 200, 400);
+function Passaro(alturaJogo) {
+
+    //variavel que diz quando o passaro ira subir
+    let voando = false;
+
+    //cria o elemento passaro
+    this.elemento = novoElemento('img', 'passaro');
+    this.elemento.src = '../img/passaro.png';
+
+    //funcao para pegar a altura do passaro no eixo y
+    this.getY = () => parseInt(this.elemento.style.bottom.split('px')[0]);
+    //funcao para definir uma nova altura no eixo y
+    this.setY = y => this.elemento.style.bottom = `${y}px`;
+
+    //eventos que pegam quando uma tecla foi apertada ou solta para fazer o passaro subir
+    window.onkeydown = e => voando = true;
+    window.onkeyup = e => voando = false;
+
+    //funcao de animacao que faz o passaro ficar mudando altura no eixo y
+    this.animar = () => {
+
+        //define a nova altura baseando se esta em queda ou voando
+        //8 e -7 podemos e a velocidade que sobe ou cai
+        const novoY = this.getY() + (voando ? 8 : -7);
+        //define altura max do jogo subtraindo do tamanho da tela o tamanho do passaro e o tamanho da borda
+        const alturaMax = alturaJogo - this.elemento.clientHeight - 10;
+
+        //verificacao para nova altura do passaro
+        if (novoY <= 0) {
+
+            //para ele nao sumir pela parte de baixo da tela
+            //mudar para colisao depois
+            this.setY(0);
+        } else if (novoY >= alturaMax) {
+
+            //para evitar que ele suma da tela por cima
+            this.setY(alturaMax);
+        } else {
+
+            //caso esteja tudo certo ele varia y na tela
+            this.setY(novoY);
+        }
+
+    }
+
+    //define a posicao inicial do passaro no meio da tela
+    this.setY(alturaJogo / 2);
+}
+
+const obstaculo = new Barreiras(700, 1100, 200, 400);
+const passaro = new Passaro(700);
 const areaJogo = document.querySelector('[wm-flappy]');
-b.pares.forEach(par => areaJogo.appendChild(par.elemento));
+
+areaJogo.appendChild(passaro.elemento);
+obstaculo.pares.forEach(par => areaJogo.appendChild(par.elemento));
 
 
 setInterval(() => {
-    b.animar();
+    obstaculo.animar();
+    passaro.animar();
 }, 20); 
