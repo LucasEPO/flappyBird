@@ -89,3 +89,16 @@ body {
     font-size: 70px;
     z-index: 100;
 }
+
+.menu {
+    position: absolute;
+    left: calc(50% - 120px); 
+    top: calc(50% - 90px);
+    background-image: radial-gradient(gold, #cc7007);
+    border: 5px solid #000;
+    border-radius: 20px;
+    padding: 30px;
+    font-family: Pixel;
+    font-size: 80px;
+    z-index: 1000;
+}
