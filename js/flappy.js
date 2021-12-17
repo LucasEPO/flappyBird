@@ -159,13 +159,57 @@ function Passaro(alturaJogo) {
     this.setY(alturaJogo / 2);
 }
 
+//Funcao responsavel por contabilizar os pontos no jogo
 function Progresso() {
+    
+    //cria elemento
     this.elemento = novoElemento('span', 'progresso');
+    //atualiza os pontos
     this.atualizarPontos = pontos => {
         this.elemento.innerHTML = pontos;
     }
 
+    //inicia pontuacao em zero
     this.atualizarPontos(0);
+}
+
+//Funcao para criar o menu de start/restart
+function Menu(start = true) {
+
+    //cria elemento
+    this.elemento = novoElemento('button', 'menu');
+    
+    //verifica se primeira chamada do site para definir o texto do botao
+    if(start){
+
+        this.elemento.innerHTML = "START";
+    } else {
+
+        this.elemento.innerHTML = "TRY AGAIN";
+        this.elemento.style.left = '390px';
+    }
+
+    //evento de clique no botao
+    this.elemento.onclick = function() {
+        
+        //quando for o botao de restart
+        if(start === false){
+            
+            //limpa a tela do jogo anterior
+            deletaElementos('passaro');
+            deletaElementos('barreira');
+            deletaElementos('parDeBarreiras');
+            deletaElementos('progresso');
+           
+        }
+
+        //deleta o botao da tela
+        deletaElementos('menu');
+
+        //inicia o jogo
+        const jogo = new FlappyBird();
+        jogo.start();
+    }
 }
 
 //Funcao que verifica se dois elementos estao se sobrepondo
@@ -208,6 +252,14 @@ function colidiu(passaro, barreiras) {
     return colidiu;
 }
 
+//funcao que deleta elementos da dom
+function deletaElementos(className){
+    var elements = document.getElementsByClassName(className);
+    while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+    }
+}
+
 function FlappyBird(){
 
     let pontos = 0;
@@ -223,6 +275,7 @@ function FlappyBird(){
     const obstaculo = new Barreiras(altura, largura, 200, 400, 
         () => progresso.atualizarPontos(++pontos));
     
+    
     //coloca cada elemento na tela de jogo
     areaJogo.appendChild(progresso.elemento);
     areaJogo.appendChild(passaro.elemento);
@@ -230,6 +283,7 @@ function FlappyBird(){
 
     //funcao que inicia o jogo
     this.start = () => {
+        
 
         const temporizador = setInterval(() => {
 
@@ -238,11 +292,18 @@ function FlappyBird(){
 
             //verifica se houve colisao
             if (colidiu(passaro, obstaculo)) {
+                //chama menu de restart
+                const botaoStart = new Menu(false);
+                areaJogo.appendChild(botaoStart.elemento);
+
                 clearInterval(temporizador);
             }
         }, 20); 
-    }
+    } 
 
 }
 
-new FlappyBird().start();
+//chama menu de start
+const areaJogo = document.querySelector('[wm-flappy]');
+const botaoStart = new Menu(true);
+areaJogo.appendChild(botaoStart.elemento);
